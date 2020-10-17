@@ -74,7 +74,7 @@ class ViewController: UIViewController {
         player.buffering = .always
         print(player.processingFormat)
         
-        //player.isStarted
+        player.isStarted
          //AudioKitStuff
          mic = AKMicrophone()
           mic.start()

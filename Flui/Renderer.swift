@@ -80,6 +80,8 @@ class Renderer: NSObject, MTKViewDelegate {
         setupPipeState()
       vertexFunc()
         setupTextures()
+        
+        
     }
        //MARK: init
     
@@ -94,6 +96,7 @@ class Renderer: NSObject, MTKViewDelegate {
     
     
        //MARK: setupTextures
+    var tex: MTLTexture!
     func setupTextures(){
 
            let w = Int(Float(width))// / Renderer.ScreenScaleAdjustment)
@@ -109,6 +112,13 @@ class Renderer: NSObject, MTKViewDelegate {
                   print("TEXTURE DESCRIPTOR FUNC")
                          ping = device.makeTexture(descriptor: textureDescriptor)
                          pong = device.makeTexture(descriptor: textureDescriptor)
+        
+        
+        
+        let texLoad = MTKTextureLoader(device: device)
+        tex = try! texLoad.newTexture(name: "controlBackground", scaleFactor: 1, bundle: Bundle.main, options: nil)
+        
+        
     }
      //MARK: setupTextures
     
@@ -236,8 +246,8 @@ class Renderer: NSObject, MTKViewDelegate {
                      //CamTexture
                    //    commandEncoder.setFragmentTexture(texture, index: 5)
                        
-                      
-                        
+                       
+                       
                     var mx = Float((self.fft?.fftData.max())!)
             commandEncoder.setFragmentBuffer(ffft, offset: 0, index: 4)
             commandEncoder.setFragmentBytes(&tt, length: MemoryLayout<Float>.stride, index: 3)
@@ -274,6 +284,7 @@ class Renderer: NSObject, MTKViewDelegate {
                       if let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
             commandEncoder.setRenderPipelineState(renderPipelineState)
             commandEncoder.setVertexBuffer(self.vertData, offset: 0, index: 0)
+                        commandEncoder.setFragmentTexture(tex, index: 6)
             commandEncoder.setFragmentBytes(&res, length: MemoryLayout<float2>.stride, index: 1)
             commandEncoder.setFragmentBytes(&tt, length: MemoryLayout<Float>.stride, index: 3)
             commandEncoder.setFragmentBuffer(ffft, offset: 0, index: 4)

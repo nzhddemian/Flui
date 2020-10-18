@@ -53,9 +53,10 @@ float rand(float2 co)
 
 
 
-fragment float4 visualizeScalar(VertexOut fragmentIn [[stage_in]], texture2d<float, access::sample> tex2d [[texture(0)]],texture2d<float, access::sample> cam [[texture(5)]], constant float &tt [[buffer(3)]],  constant float *ffft [[buffer(4)]], constant float2 &res [[buffer(1)]]) {
+fragment float4 visualizeScalar(VertexOut fragmentIn [[stage_in]], texture2d<float, access::sample> tex2d [[texture(0)]],texture2d<float, access::sample> cam [[texture(5)]], constant float &tt [[buffer(3)]],  constant float *ffft [[buffer(4)]], constant float2 &res [[buffer(1)]],texture2d<float, access::sample> tex [[texture(6)]]) {
     constexpr sampler sampler2d(filter::linear);
     float2 uv = fragmentIn.textureCoorinates;
+    float4 backgr = float4(tex.sample(sampler2d, uv ).rgb,1);
        float y = uv.y;
        uv.y-=.5;
        uv-=.5;
@@ -74,34 +75,34 @@ fragment float4 visualizeScalar(VertexOut fragmentIn [[stage_in]], texture2d<flo
     
     
     
-     //MARK: STARS
+//     //MARK: STARS
         float4 starCol = float4(0.);
         float size = 10.0;
-        float prob = 0.997;
+        float prob = 0.99;
        // float2 res = (tex2d.get_width(), tex2d.get_height());
-         
+
         float2 pos = floor(1.0 / size * fragmentIn.textureCoorinates*res);
-        
+
         float color = 0.0;
         float starValue = rand(pos);
-        
+
         if (starValue > prob)
         {
             float2 center = size * pos + float2(size, size) * 0.5;
-            
+
             float t = 0.9 + 1.2 * sin(tt/15. + (starValue - prob) / (1.0 - prob) * 45.0);
-                    
+
             color = 1.0 - distance(fragmentIn.textureCoorinates*res, center) / (0.5 * size);
             color = color ;//* t / (abs((fragmentIn.textureCoorinates*res).x - center.x)) * t / (abs((fragmentIn.textureCoorinates*res).y - center.y));
         }
-       
-        
-        
+
+
+
         starCol = float4(float3(color), 1.0);
-        starCol.g-= 0.2;
-        starCol.rb*= starCol.rb;
-        //MARK: STARS
-        
+        starCol.g-= 0.;
+        starCol.rgb*= starCol.grb;
+//        //MARK: STARS
+//
         
           float2 p = fragmentIn.textureCoorinates;
         //    float2 R = p + float2(0.5, -0.5);
@@ -113,8 +114,19 @@ fragment float4 visualizeScalar(VertexOut fragmentIn [[stage_in]], texture2d<flo
         //    fragColor.g=0.;
         //
         float aspect = res.x/res.y;
-    float4 fragColoru = float4(tex2d.sample(sampler2d, float2(( (p)).x ,(p).y +.4 + fft ) ));
-    float4 fragColord = float4(tex2d.sample(sampler2d, float2(( (p) ).x ,1. -(p).y + fft ) ));
+    float4 fragColoru = float4(tex2d.sample(sampler2d, float2(( (p)).x ,(p).y +.39  -.035) ));
+    
+    float4 fragColord = float4(tex2d.sample(sampler2d, float2(( (p) ).x ,1. -(p).y  +.035) ));
+    
+//    float4 fragColoru2 = float4(tex2d.sample(sampler2d, float2(( (p)).x ,(p).y +.4 + fft ) ));
+//    float4 fragColord2 = float4(tex2d.sample(sampler2d, float2(( (p) ).x ,1. -(p).y + fft ) ));
+//    float4 fragColoru=float4(1.0);
+//            fragColoru+=fragColoru1;
+//            fragColoru+=fragColoru2;
+//    float4 fragColord=float4(1.0);
+//            fragColord+=fragColord1;
+//            fragColord+=fragColord2;
+  
            // fragColor.rb+=fragColor.rb;
              //fragColor.b+=fragColor.r/2;
         float4 coll = float4(0.);
@@ -123,9 +135,14 @@ fragment float4 visualizeScalar(VertexOut fragmentIn [[stage_in]], texture2d<flo
     p.y-=.3;
     coll.r*=length(p-.5);
     coll+=(coll*2);
-    p.y+=.45;
+    //p.y+=.47;
+    p.y+=.51;
     //coll*=length(float2(p.x,p.y+1.));
-    coll-=smoothstep(.1,.5,length(p-.5));
+  //  p.x/=2.;
+    //Make rounded
+   // coll-=smoothstep(.1,.5,length(  float2( (p-.5).x/1.9,(p-.5).y*2. )  ));
+    coll-=smoothstep(.1,.5,length(  float2( (p-.5).x/2.9,(p-.5).y*1. )  ));
+    //coll.b-=smoothstep(.1,.3,length(  float2( (p-.5).x/2,(p-.5).y )  ));
   //  coll*=length(p-.5);
        // coll-=float4((fragmentIn.textureCoorinates.y+0.3));
         
@@ -142,10 +159,12 @@ fragment float4 visualizeScalar(VertexOut fragmentIn [[stage_in]], texture2d<flo
         float4 f = float4(1.);
   
         //float2 uv = fragmentIn.textureCoorinates;
-       
-        float4 fanal = coll;
-        fanal+=starCol;
-       
+    if(coll.b<0.1){coll = float4(0,0,0,1);}
+    float4 fanal = float4(starCol.g);//float4(0.,0.,0.,1.);
+        fanal+=coll;
+        
+       // fanal.rbg+=starCol.rgb;
+       // fanal.rgb+=backgr.rgb;
         return fanal;
 }
 
@@ -185,7 +204,7 @@ struct Mouse {
 //DRAW FFT audio Spect
 fragment float4 applyForceScalar(VertexOut fragmentIn [[stage_in]], texture2d<float, access::sample> input [[texture(0)]], constant float &tt [[buffer(3)]],  constant float *ffft [[buffer(4)]], constant float2 &res [[buffer(1)]]) {
     constexpr sampler fluid_sampler(filter::linear);
-
+    
    
     //float2 res = res;
     float radius = 500.;//bufferData.inkRadius;
@@ -218,7 +237,7 @@ fragment float4 applyForceScalar(VertexOut fragmentIn [[stage_in]], texture2d<fl
     color = mix( float4(col), color, length(float2(0,flot-1.)) );
     
    // }
-    if(fragmentIn.textureCoorinates.y>.699){color = float4(0);}
+    if(fragmentIn.textureCoorinates.y>.699 ){color = float4(0);}
     return color;
 }
 

@@ -17,7 +17,7 @@ var mouse = float2()
 }
 var m = Mouse()
 class ViewController: UIViewController {
-
+ static let shared = ViewController()
     
     //AudioKitStuff
     var timer:  Timer!
@@ -84,7 +84,8 @@ class ViewController: UIViewController {
                            try! AudioKit.start()
                        
                        }
-        player.play()
+                
+       player.play()
                        osc.start()
         //metalView.delegate = render
                           metalView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height)
@@ -97,9 +98,12 @@ class ViewController: UIViewController {
         
        // self.view.addSubview(imgView)
           self.view.layer.addSublayer(metalView.layer)
-     
+      metalView.isPaused = active
+        if(metalView.isPaused){
+          print("!!!!!!!! BACKGROUND")
+            
         //self.view.insertSubview(meta, belowSubview: <#T##UIView#>)
-        
+        }
     }
 
     

@@ -68,7 +68,7 @@ class Renderer: NSObject, MTKViewDelegate {
         metalView.device = device
         metalView.colorPixelFormat = .bgra8Unorm
         
-        metalView.preferredFramesPerSecond = 60
+      //  metalView.preferredFramesPerSecond = 15
        commandQueue =  device.makeCommandQueue()!
          defaultLibrary = device.makeDefaultLibrary()!
           super.init()
@@ -207,7 +207,9 @@ class Renderer: NSObject, MTKViewDelegate {
     
     
     func draw(in view: MTKView) {
- 
+       
+      //  view.waitUntilScheduled()
+        //print(view.isPaused)
         let commandBuffer = commandQueue.makeCommandBuffer()!
          
 //        guard let previewPixelBuffer = pixelBuffer else {
@@ -229,6 +231,7 @@ class Renderer: NSObject, MTKViewDelegate {
         
           var ft = [Float]()
         for i in 0...128{ft.append(Float((self.fft?.fftData[i])!))}
+        print(ft.count)
         ffft = device.makeBuffer(bytes: ft, length: ft.count*MemoryLayout<Float>.stride, options:[])
         tt+=0.1
 
@@ -270,7 +273,7 @@ class Renderer: NSObject, MTKViewDelegate {
         ping = pong
         pong = temp
         
-         if let drawable = view.currentDrawable {
+         let drawable = view.currentDrawable
 
        //  renderScalar.calculateWithCommandBuffer(buffer: commandBuffer, indices: indexData, count: Renderer.indices.count, texture: drawable.texture) { (commandEncoder) in
             
@@ -278,7 +281,7 @@ class Renderer: NSObject, MTKViewDelegate {
             
             if let renderPipelineState = renderPipeState {
                        let renderPassDescriptor = MTLRenderPassDescriptor()
-                             renderPassDescriptor.colorAttachments[0].texture = drawable.texture
+                renderPassDescriptor.colorAttachments[0].texture = drawable?.texture
                             renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 0.0)
                           //print("!!!!!!RenderShader calculateWithCommandBuffer!!!!!!!")
                       if let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) {
@@ -293,11 +296,18 @@ class Renderer: NSObject, MTKViewDelegate {
 commandEncoder.endEncoding()
                   }
             }
-            commandBuffer.present(drawable)
-        }
-
+            commandBuffer.addCompletedHandler { cb in
+                let executionDuration = cb.gpuEndTime - cb.gpuStartTime
+              //  cb.waitUntilScheduled()
+               // print(executionDuration)
+            }
+            ///commandBuffer.present(drawable!)
+        
+        
         commandBuffer.commit()
-
+        commandBuffer.waitUntilScheduled()
+      //  view.isPaused = active
+        drawable!.present()
        
     }
    //MARK: DRAW

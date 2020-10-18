@@ -56,7 +56,7 @@ float rand(float2 co)
 fragment float4 visualizeScalar(VertexOut fragmentIn [[stage_in]], texture2d<float, access::sample> tex2d [[texture(0)]],texture2d<float, access::sample> cam [[texture(5)]], constant float &tt [[buffer(3)]],  constant float *ffft [[buffer(4)]], constant float2 &res [[buffer(1)]],texture2d<float, access::sample> tex [[texture(6)]]) {
     constexpr sampler sampler2d(filter::linear);
     float2 uv = fragmentIn.textureCoorinates;
-    float4 backgr = float4(tex.sample(sampler2d, uv ).rgb,1);
+    //float4 backgr = float4(tex.sample(sampler2d, uv ).rgb,1);
        float y = uv.y;
        uv.y-=.5;
        uv-=.5;
@@ -114,7 +114,7 @@ fragment float4 visualizeScalar(VertexOut fragmentIn [[stage_in]], texture2d<flo
         //    fragColor.g=0.;
         //
         float aspect = res.x/res.y;
-    float4 fragColoru = float4(tex2d.sample(sampler2d, float2(( (p)).x ,(p).y +.39  -.035) ));
+   float4 fragColoru = float4(tex2d.sample(sampler2d, float2(( (p)).x ,(p).y +.4  -.035) ));
     
     float4 fragColord = float4(tex2d.sample(sampler2d, float2(( (p) ).x ,1. -(p).y  +.035) ));
     
@@ -136,19 +136,20 @@ fragment float4 visualizeScalar(VertexOut fragmentIn [[stage_in]], texture2d<flo
     coll.r*=length(p-.5);
     coll+=(coll*2);
     //p.y+=.47;
-    p.y+=.51;
+    p.y+=.53;
     //coll*=length(float2(p.x,p.y+1.));
   //  p.x/=2.;
     //Make rounded
    // coll-=smoothstep(.1,.5,length(  float2( (p-.5).x/1.9,(p-.5).y*2. )  ));
     coll-=smoothstep(.1,.5,length(  float2( (p-.5).x/2.9,(p-.5).y*1. )  ));
+    coll-=smoothstep(.23,.3,length(  float2( (p-.5).x/12.9,(p-.5).y*1. )  ))*3;
     //coll.b-=smoothstep(.1,.3,length(  float2( (p-.5).x/2,(p-.5).y )  ));
   //  coll*=length(p-.5);
        // coll-=float4((fragmentIn.textureCoorinates.y+0.3));
         
         coll.b = coll.g;
         coll.g = 0.;
-    coll+=coll;
+   // coll+=coll;
       //coll+=coll;
        // coll.r =float((fragmentIn.textureCoorinates.y+0.1));
        
@@ -225,8 +226,8 @@ fragment float4 applyForceScalar(VertexOut fragmentIn [[stage_in]], texture2d<fl
     float f = fract(x);
     float fft =  mix(ffft[ii]/12.,ffft[ii+1]/12.,smoothstep(0.,1.,f));
       
-    float4 color = float4(input.sample(fluid_sampler, float2((gid*.998 + res*.001  ).x,(gid*.998 + res*(.0001 + abs((y))/300.)  ).y) / res));
-
+//    float4 color = float4(input.sample(fluid_sampler, float2((gid*.998 + res*.001  ).x,(gid*.998 + res*(.0001 + abs((y))/300.)  ).y) / res));
+float4 color = float4(input.sample(fluid_sampler, float2((gid*(.998 - abs(y)/1000.)+ res*(.001 + abs(y)/2000.) ).x,(gid*.998 + res*(.0001 + abs(y)/300.)  ).y) / res));
     float veiw = uv.y + 1.5 + pow(fft,1.1);
       float flot = ((smoothstep(0.92, 1.0, veiw) ));
     //  col+= float3((flot));
